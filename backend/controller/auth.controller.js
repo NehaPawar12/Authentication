@@ -1,3 +1,4 @@
+import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import { generateVerificationCode } from '../utils/generateVerificationCode.js';
 import { User } from './../models/user.model.js';
 import bcrypt from 'bcryptjs';
@@ -27,6 +28,16 @@ export const signup = async (req, res) => {
         })   //this will create a new user in the database.
 
         await user.save();   //this will save the user to the database.
+
+        //jwt
+        generateTokenAndSetCookie(res, user._id);   //this will generate a token and set it in the cookie.
+
+        res.status(201).json({success:true, message: 'User created successfully',
+            user: {
+                ...user._doc,  //this will spread the user document.
+                password: undefined,  //this will hide the password from the user.
+            }
+        });
         
     } catch (error) {
         res.status(400).json({success:false, message: error.message});
