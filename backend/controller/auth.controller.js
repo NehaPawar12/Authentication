@@ -1,5 +1,36 @@
-export const signup = (req, res) => {
-    res.send('Signup Route');
+import { generateVerificationCode } from '../utils/generateVerificationCode.js';
+import { User } from './../models/user.model.js';
+import bcrypt from 'bcryptjs';
+
+export const signup = async (req, res) => {
+    const {email, password, name} = req.body;   //this will get the data filled by the user in the signup form.
+
+    try {
+
+        if(!email || !password || !name){
+            throw new Error('All fields are required');
+        }
+
+        const userAlreadyExists = await User.findOne({email});   //this will check if the user already exists in the database.
+        if(userAlreadyExists){
+            res.status(400).json({success:false , message: 'User already exists'});
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 11);   //this will hash the password before saving it to the database.
+        const verificationToken = generateVerificationCode();
+        const user = new User({
+            email,
+            password: hashedPassword,
+            name,
+            verificationToken,
+            verificationTokenExpiresAt : Date.now() + 24*60*60*1000,   //this will set the verification token expiry time to 24 hours from now.
+        })   //this will create a new user in the database.
+
+        await user.save();   //this will save the user to the database.
+        
+    } catch (error) {
+        res.status(400).json({success:false, message: error.message});
+    }
 };
 
 export const login = (req, res) => {

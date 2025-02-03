@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5000;
 //     });   //For testing purpose
 
 
+app.use(express.json());  // this will parse the incoming request : req.body
 //Authentication Routes
 
 app.use('/api/auth', authRoutes);
