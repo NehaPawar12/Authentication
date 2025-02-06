@@ -1,3 +1,4 @@
+import { sendVerificationEmail } from '../mailtrap/emails.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import { generateVerificationCode } from '../utils/generateVerificationCode.js';
 import { User } from './../models/user.model.js';
@@ -31,6 +32,8 @@ export const signup = async (req, res) => {
 
         //jwt
         generateTokenAndSetCookie(res, user._id);   //this will generate a token and set it in the cookie.
+
+        await sendVerificationEmail(user.email, verificationToken);   //this will send the verification email to the user.
 
         res.status(201).json({success:true, message: 'User created successfully',
             user: {
