@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, logout, signup } from '../controller/auth.controller.js';
+import { login, logout, signup, verifyEmail } from '../controller/auth.controller.js';
 
 const router = express.Router();     // this will create a new router object.
 
@@ -9,5 +9,7 @@ router.post('/signup', signup             // /signup is prefixed with /api/auth 
 router.post('/login', login);
 
 router.post('/logout', logout);
+
+router.post("/verify-email", verifyEmail);
 
 export default router;

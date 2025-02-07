@@ -1,8 +1,9 @@
-import { sendVerificationEmail } from '../mailtrap/emails.js';
+import { sendVerificationEmail, sendWelcomeEmail } from '../mailtrap/emails.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import { generateVerificationCode } from '../utils/generateVerificationCode.js';
 import { User } from './../models/user.model.js';
 import bcrypt from 'bcryptjs';
+import { verify } from 'crypto';
 
 export const signup = async (req, res) => {
     const {email, password, name} = req.body;   //this will get the data filled by the user in the signup form.
@@ -46,6 +47,32 @@ export const signup = async (req, res) => {
         res.status(400).json({success:false, message: error.message});
     }
 };
+
+export const verifyEmail = async (req, res) => {
+    const { code } = req.body;   //this will get the verification token from the request body
+
+    try {
+
+        const user = await User.findOne({
+            verificationToken: code,
+            verificationTokenExpiresAt: {$gt: Date.now()}   //this will check if the verification token is valid.
+        })
+
+        if(!user){
+            return res.status(400).json({success:false, message: 'Invalid or expired verification code'});
+        }
+
+        user.isVerified = true;   //this will set the user as verified.
+        user.verificationToken = undefined;   //this will remove the verification token.
+        user.verificationTokenExpiresAt = undefined;   //this will remove the verification token expiry time.
+
+        await user.save();   //this will save the user to the database.
+        await sendWelcomeEmail(user.email, user.name);   //this will send the welcome email to the user.
+        
+    } catch (error) {
+        
+    }
+}
 
 export const login = (req, res) => {
     res.send('Login Route');
