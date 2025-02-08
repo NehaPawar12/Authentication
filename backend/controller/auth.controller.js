@@ -3,7 +3,6 @@ import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js
 import { generateVerificationCode } from '../utils/generateVerificationCode.js';
 import { User } from './../models/user.model.js';
 import bcrypt from 'bcryptjs';
-import { verify } from 'crypto';
 
 export const signup = async (req, res) => {
     const {email, password, name} = req.body;   //this will get the data filled by the user in the signup form.
@@ -87,5 +86,6 @@ export const login = (req, res) => {
 };
 
 export const logout = (req, res) => {
-    res.send('Logout Route');
+    res.clearCookie('token');
+    res.status(200).json({success:true, message: 'Logged out successfully'});
 };
